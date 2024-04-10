@@ -4,8 +4,6 @@ import { AppBar, Box, Button, Toolbar } from "@mui/material";
 import Logo from "../../assets/logo.png";
 import Typography from "@mui/material/Typography";
 
-const Title = "DATASHAPER";
-
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -61,9 +59,9 @@ const Navbar = () => {
           )}
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          <Button sx={{ color: "black", mr: 5 }} component={Link} to="/">
+          {/* <Button sx={{ color: "black", mr: 5 }} component={Link} to="/">
             Home
-          </Button>
+          </Button> */}
         </Box>
       </Toolbar>
     </AppBar>
