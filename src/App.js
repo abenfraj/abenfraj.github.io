@@ -2,28 +2,18 @@ import "./App.css";
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./Home/home";
-
-const About = () => (
-  <div>
-    <h2>About Page</h2>
-  </div>
-);
-const Contact = () => (
-  <div>
-    <h2>Contact Page</h2>
-  </div>
-);
+import Navbar from "./components/navbar/Navbar";
+import { Container } from "@mui/material";
 
 const App = () => {
   return (
     <Router>
-      <div>
+      <Navbar />
+      <Container maxWidth={false} sx={{ marginTop: "10rem", height: "100rem" }}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
         </Routes>
-      </div>
+      </Container>
     </Router>
   );
 };
