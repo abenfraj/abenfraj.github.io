@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { AppBar, Box, Button, Toolbar } from "@mui/material";
+import { AppBar, Box, Toolbar } from "@mui/material";
 import Logo from "../../assets/logo.png";
 import Typography from "@mui/material/Typography";
+import Login from "../login/Login";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -59,9 +59,7 @@ const Navbar = () => {
           )}
         </Box>
         <Box sx={{ display: "flex", alignItems: "center" }}>
-          {/* <Button sx={{ color: "black", mr: 5 }} component={Link} to="/">
-            Home
-          </Button> */}
+          <Login></Login>
         </Box>
       </Toolbar>
     </AppBar>
