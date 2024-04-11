@@ -1,7 +1,8 @@
 import React from "react";
 import { GoogleLogin } from "react-google-login";
 
-const googleClientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+const googleClientId =
+  "858469242167-teb4fpuh4ck3kqjcqkrgm6gva9u9n0us.apps.googleusercontent.com";
 console.log(googleClientId);
 
 function Login() {
