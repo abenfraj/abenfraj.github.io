@@ -5,8 +5,22 @@ import Home from "./pages/home/Home";
 import Navbar from "./components/navbar/Navbar";
 import { Container } from "@mui/material";
 import { Footer } from "./components/footer/Footer";
+import { useEffect } from "react";
+import { gapi } from "gapi-script";
 
 const App = () => {
+  useEffect(() => {
+    const start = async () => {
+      gapi.client.init({
+        clientId:
+          "858469242167-teb4fpuh4ck3kqjcqkrgm6gva9u9n0us.apps.googleusercontent.com",
+        scope: "",
+      });
+    };
+
+    gapi.load("client:auth2", start);
+  }, []);
+
   return (
     <Router>
       <Navbar />
