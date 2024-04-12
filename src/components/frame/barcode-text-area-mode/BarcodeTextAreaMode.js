@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TextareaAutosize, MenuItem, Select, Grid } from "@mui/material";
 import Frame from "../Frame";
-import "./BarcodeTextAreaMode.css"; // Importing the CSS file
+import { auth } from "../../../firebase/firebase-config";
+import {
+  loadUserPreferences,
+  saveUserPreferences,
+} from "../../../firebase/firebaseService";
 
 const BarcodeTextAreaMode = ({
   barcodeTextLines,
@@ -10,6 +14,35 @@ const BarcodeTextAreaMode = ({
 }) => {
   const [defaultType, setDefaultType] = useState("QR");
   const [barcodeTypes] = useState(["QR", "Code128"]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        loadUserPreferences(
+          user.uid,
+          (defaultType) => {
+            if (defaultType) {
+              setDefaultType(defaultType);
+            }
+          },
+          "defaultType"
+        );
+      } else {
+        setDefaultType("QR"); // Optional: Reset to default or handle logged out state
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup subscription
+  }, []);
+
+  const handleDefaultTypeChange = async (event) => {
+    const newType = event.target.value;
+    setDefaultType(newType);
+    const user = auth.currentUser;
+    if (user) {
+      await saveUserPreferences(user.uid, { defaultType: newType });
+    }
+  };
 
   const handleTextareaChange = (event) => {
     const lines = event.target.value.split("\n");
@@ -20,36 +53,6 @@ const BarcodeTextAreaMode = ({
     }));
     setBarcodeTextLines(newBarcodeTextLines);
   };
-
-  const handleDefaultTypeChange = (event) => {
-    const newType = event.target.value;
-    setDefaultType(newType);
-    const updatedLines = barcodeTextLines.map((line) => ({
-      ...line,
-      type: newType,
-    }));
-    setBarcodeTextLines(updatedLines);
-  };
-
-  const updateHoveredBarcodeId = (textarea) => {
-    const charIndex = textarea.selectionStart;
-    const textUpToPointer = textarea.value.substr(0, charIndex);
-    const lineNumber = textUpToPointer.split("\n").length - 1;
-
-    if (barcodeTextLines[lineNumber]) {
-      setHoveredBarcodeId(barcodeTextLines[lineNumber].id);
-    } else {
-      setHoveredBarcodeId(null);
-    }
-  };
-
-  const handleCursorActivity = (event) => {
-    updateHoveredBarcodeId(event.target);
-  };
-
-  const textareaValue = barcodeTextLines
-    .map((barcode) => barcode.text)
-    .join("\n");
 
   return (
     <Grid item xs={6} sx={{ height: "50%", width: "100%", padding: "1rem" }}>
@@ -80,7 +83,7 @@ const BarcodeTextAreaMode = ({
         </div>
         <TextareaAutosize
           minRows={50}
-          className="textarea-scrollbar" // Added class name for custom scrollbar styles
+          className="textarea-scrollbar"
           style={{
             width: "80%",
             boxSizing: "border-box",
@@ -93,11 +96,8 @@ const BarcodeTextAreaMode = ({
             borderRadius: "4px",
             lineHeight: "1.5",
           }}
-          value={textareaValue}
+          value={barcodeTextLines.map((barcode) => barcode.text).join("\n")}
           onChange={handleTextareaChange}
-          onMouseMove={handleCursorActivity}
-          onClick={handleCursorActivity}
-          onKeyUp={handleCursorActivity}
         />
       </Frame>
     </Grid>

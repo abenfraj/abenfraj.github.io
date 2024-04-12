@@ -6,6 +6,11 @@ import { useEffect } from "react";
 import { useState } from "react";
 import { Select, MenuItem } from "@mui/material";
 import { Button } from "@mui/material";
+import {
+  loadUserPreferences,
+  saveUserPreferences,
+} from "../../../firebase/firebaseService";
+import { auth } from "../../../firebase/firebase-config";
 
 const BarcodeTextFrame = ({
   barcodeTextLines,
@@ -40,6 +45,35 @@ const BarcodeTextFrame = ({
       newLineRef.current.focus();
     }
   }, [barcodeTextLines]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        loadUserPreferences(
+          user.uid,
+          (defaultType) => {
+            if (defaultType) {
+              setDefaultType(defaultType);
+            }
+          },
+          "defaultType"
+        );
+      } else {
+        setDefaultType("QR"); // Optional: Reset to default or handle logged out state
+      }
+    });
+
+    return () => unsubscribe(); // Cleanup subscription
+  }, []);
+
+  const handleDefaultTypeChange = async (event) => {
+    const newType = event.target.value;
+    setDefaultType(newType);
+    const user = auth.currentUser;
+    if (user) {
+      await saveUserPreferences(user.uid, { defaultType: newType });
+    }
+  };
 
   return (
     <Grid item xs={6} sx={{ height: "50%", width: "100%", padding: "1rem" }}>
@@ -99,7 +133,7 @@ const BarcodeTextFrame = ({
           </Button>
           <Select
             value={defaultType}
-            onChange={(e) => setDefaultType(e.target.value)}
+            onChange={handleDefaultTypeChange}
             size="small"
             sx={{ height: "fit-content" }}
           >

@@ -1,14 +1,9 @@
 import React, { useState } from "react";
-import { GoogleLogin } from "react-google-login";
 import { Button, Avatar, Menu, MenuItem, Typography } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
-import firebase from "firebase/app";
-import { auth } from "../../firebase-config";
+import { auth } from "../../firebase/firebase-config";
 import { useEffect } from "react";
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
-
-const googleClientId =
-  "858469242167-teb4fpuh4ck3kqjcqkrgm6gva9u9n0us.apps.googleusercontent.com";
 
 function Login() {
   const [user, setUser] = useState(null);
