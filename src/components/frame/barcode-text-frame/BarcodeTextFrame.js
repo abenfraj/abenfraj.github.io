@@ -13,17 +13,15 @@ const BarcodeTextFrame = ({
   setHoveredBarcodeId,
 }) => {
   const newLineRef = useRef(null);
-  const [defaultType, setDefaultType] = useState("Code128");
+  const [defaultType, setDefaultType] = useState("QR");
   const [barcodeTypes, setBarcodeTypes] = useState(["QR", "Code128"]);
 
   const handleMouseEnter = (id) => {
     setHoveredBarcodeId(id);
-    console.log("hoveredBarcodeId", id);
   };
 
   const handleMouseLeave = () => {
     setHoveredBarcodeId(null);
-    console.log("hoveredBarcodeId", null);
   };
 
   const addNewLine = () => {
@@ -93,6 +91,7 @@ const BarcodeTextFrame = ({
             justifyContent: "flex-start",
             gap: "10px",
             marginTop: "1rem",
+            marginBottom: "1rem",
           }}
         >
           <Button variant="outlined" onClick={addNewLine}>

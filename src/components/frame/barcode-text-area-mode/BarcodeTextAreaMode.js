@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { TextareaAutosize, MenuItem, Select, Grid } from "@mui/material";
 import Frame from "../Frame";
+import "./BarcodeTextAreaMode.css"; // Importing the CSS file
 
 const BarcodeTextAreaMode = ({
   barcodeTextLines,
   setBarcodeTextLines,
   setHoveredBarcodeId,
 }) => {
-  const [defaultType, setDefaultType] = useState("Code128");
+  const [defaultType, setDefaultType] = useState("QR");
   const [barcodeTypes] = useState(["QR", "Code128"]);
 
   const handleTextareaChange = (event) => {
@@ -62,7 +63,7 @@ const BarcodeTextAreaMode = ({
           alignItems: "center",
         }}
       >
-        <div style={{ marginBottom: "1rem" }}>
+        <div style={{ marginBottom: "1rem", marginTop: "1rem" }}>
           <Select
             value={defaultType}
             onChange={handleDefaultTypeChange}
@@ -78,11 +79,13 @@ const BarcodeTextAreaMode = ({
           </Select>
         </div>
         <TextareaAutosize
-          minRows={10}
+          minRows={50}
+          className="textarea-scrollbar" // Added class name for custom scrollbar styles
           style={{
             width: "80%",
             boxSizing: "border-box",
             padding: "8px",
+            marginBottom: "1rem",
             resize: "none",
             fontFamily: "Roboto, sans-serif",
             fontSize: "0.875rem",

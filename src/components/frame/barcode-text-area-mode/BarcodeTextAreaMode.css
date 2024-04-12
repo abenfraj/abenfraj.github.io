@@ -1,0 +1,15 @@
+.textarea-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.textarea-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #1976d2;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.textarea-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #145ca8;
+}

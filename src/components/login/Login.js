@@ -2,14 +2,29 @@ import React, { useState } from "react";
 import { GoogleLogin } from "react-google-login";
 import { Button, Avatar, Menu, MenuItem, Typography } from "@mui/material";
 import ArrowDropDownIcon from "@mui/icons-material/ArrowDropDown";
+import firebase from "firebase/app";
+import { auth } from "../../firebase-config";
+import { useEffect } from "react";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 const googleClientId =
   "858469242167-teb4fpuh4ck3kqjcqkrgm6gva9u9n0us.apps.googleusercontent.com";
-console.log(googleClientId);
 
 function Login() {
   const [user, setUser] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null); // For controlling the dropdown menu
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      if (user) {
+        setUser(user);
+        console.log("Authenticated user:", user);
+      } else {
+        setUser(null);
+      }
+    });
+    return () => unsubscribe(); // Cleanup subscription
+  }, []);
 
   const loggedInButtonStyle = {
     textTransform: "none",
@@ -26,27 +41,32 @@ function Login() {
     },
   };
 
-  const onSuccess = (res) => {
-    console.log("Login Success: currentUser:", res.profileObj);
-    setUser(res.profileObj);
-  };
-
-  const onFailure = (res) => {
-    console.log("Login failed: res:", res);
+  const signInWithGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        console.log("Login Success: currentUser:", result.user);
+        setUser(result.user);
+      })
+      .catch((error) => {
+        console.log("Login failed:", error);
+      });
   };
 
   const onSignOut = () => {
-    console.log("User logged out");
-    setUser(null);
-    handleClose(); // Close menu upon logging out
+    signOut(auth).then(() => {
+      console.log("User logged out");
+      setUser(null);
+      handleClose();
+    });
   };
 
   const handleClick = (event) => {
-    setAnchorEl(event.currentTarget); // Open menu
+    setAnchorEl(event.currentTarget);
   };
 
   const handleClose = () => {
-    setAnchorEl(null); // Close menu
+    setAnchorEl(null);
   };
 
   return (
@@ -58,14 +78,14 @@ function Login() {
             endIcon={<ArrowDropDownIcon />}
             startIcon={
               <Avatar
-                src={user.logoUrl || user.imageUrl}
+                src={user.photoURL || "default_user_image_url"}
                 sx={{ width: 24, height: 24 }}
               />
             }
             style={loggedInButtonStyle}
             onClick={handleClick} // Opens the menu
           >
-            {user.name}
+            {user.displayName || user.email}
           </Button>
           <Menu
             id="simple-menu"
@@ -90,13 +110,9 @@ function Login() {
           </Menu>
         </>
       ) : (
-        <GoogleLogin
-          clientId={googleClientId}
-          buttonText="Login with Google"
-          onSuccess={onSuccess}
-          onFailure={onFailure}
-          cookiePolicy={"single_host_origin"}
-        />
+        <Button onClick={signInWithGoogle} style={loggedInButtonStyle}>
+          Login with Google
+        </Button>
       )}
     </div>
   );
