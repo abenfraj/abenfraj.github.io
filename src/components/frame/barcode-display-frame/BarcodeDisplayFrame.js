@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
-import { Typography } from "@mui/material";
 import JsBarcode from "jsbarcode";
 import QRCodeSVG from "qrcode.react";
 import { Grid } from "@mui/material";
 import Frame from "../Frame";
+import { Container } from "@mui/material";
 
 const Barcode = ({ text, type }) => {
   const canvasRef = useRef();
@@ -38,10 +38,8 @@ const Barcode = ({ text, type }) => {
     >
       {type === "QR" ? (
         <QRCodeSVG value={text || " "} style={barcodeStyle} />
-      ) : text ? (
-        <canvas ref={canvasRef} style={barcodeStyle} />
       ) : (
-        <Typography>Please enter text for Code 128.</Typography>
+        <canvas ref={canvasRef} style={barcodeStyle} />
       )}
       <span
         style={{
@@ -59,7 +57,19 @@ const Barcode = ({ text, type }) => {
   );
 };
 
-const BarcodeDisplayFrame = ({ barcodeTextLines }) => {
+const BarcodeDisplayFrame = ({ barcodeTextLines, hoveredBarcodeId }) => {
+  const barcodeRefs = useRef({});
+
+  useEffect(() => {
+    if (hoveredBarcodeId && barcodeRefs.current[hoveredBarcodeId]) {
+      barcodeRefs.current[hoveredBarcodeId].scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+        inline: "center",
+      });
+    }
+  }, [hoveredBarcodeId]);
+
   return (
     <Frame
       sx={{
@@ -84,13 +94,39 @@ const BarcodeDisplayFrame = ({ barcodeTextLines }) => {
             key={barcode.id}
             item
             xs={5}
+            ref={(node) => {
+              barcodeRefs.current[barcode.id] = node;
+            }}
             style={{
               display: "flex",
               flexDirection: "column",
-              padding: "3rem",
+              padding: "1rem", // Outer padding around the container
+              transition: "all 0.3s ease",
             }}
           >
-            <Barcode text={barcode.text} type={barcode.type} />
+            <Container
+              style={{
+                flexGrow: 1,
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                border:
+                  barcode.id === hoveredBarcodeId
+                    ? "3px solid #1976d2"
+                    : "3px solid transparent",
+                boxShadow:
+                  barcode.id === hoveredBarcodeId
+                    ? "0px 0px 8px rgba(25, 118, 210, 0.5)"
+                    : "none",
+                borderRadius: "8px",
+                transition:
+                  "border 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease",
+                padding: "20px", // Padding inside the container to separate content from the border
+              }}
+            >
+              <Barcode text={barcode.text} type={barcode.type} />
+            </Container>
           </Grid>
         ))}
       </Grid>

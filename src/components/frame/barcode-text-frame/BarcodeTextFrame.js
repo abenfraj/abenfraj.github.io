@@ -7,10 +7,24 @@ import { useState } from "react";
 import { Select, MenuItem } from "@mui/material";
 import { Button } from "@mui/material";
 
-const BarcodeTextFrame = ({ barcodeTextLines, setBarcodeTextLines }) => {
+const BarcodeTextFrame = ({
+  barcodeTextLines,
+  setBarcodeTextLines,
+  setHoveredBarcodeId,
+}) => {
   const newLineRef = useRef(null);
   const [defaultType, setDefaultType] = useState("Code128");
   const [barcodeTypes, setBarcodeTypes] = useState(["QR", "Code128"]);
+
+  const handleMouseEnter = (id) => {
+    setHoveredBarcodeId(id);
+    console.log("hoveredBarcodeId", id);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredBarcodeId(null);
+    console.log("hoveredBarcodeId", null);
+  };
 
   const addNewLine = () => {
     const newLine = { id: Date.now(), text: "", type: defaultType };
@@ -44,6 +58,8 @@ const BarcodeTextFrame = ({ barcodeTextLines, setBarcodeTextLines }) => {
         </Typography>
         <BarcodeTextLinesTable
           barcodeTextLines={barcodeTextLines}
+          handleMouseEnter={handleMouseEnter}
+          handleMouseLeave={handleMouseLeave}
           handleTextChange={(id, newText) =>
             setBarcodeTextLines(
               barcodeTextLines.map((line) =>

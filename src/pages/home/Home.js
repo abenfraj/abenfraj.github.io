@@ -9,8 +9,8 @@ import { useState } from "react";
 import { Button } from "@mui/material";
 
 const Home = () => {
-  // Lifted state
   const [barcodeTextLines, setBarcodeTextLines] = useState([]);
+  const [hoveredBarcodeId, setHoveredBarcodeId] = useState(null);
   const [textAreaMode, setTextAreaMode] = useState(false);
 
   return (
@@ -24,7 +24,10 @@ const Home = () => {
           alignItems: "center",
         }}
       >
-        <BarcodeDisplayFrame barcodeTextLines={barcodeTextLines} />
+        <BarcodeDisplayFrame
+          barcodeTextLines={barcodeTextLines}
+          hoveredBarcodeId={hoveredBarcodeId}
+        />
 
         <Grid item xs={12} lg={4} sx={{ height: "100%" }}>
           <Grid
@@ -40,11 +43,13 @@ const Home = () => {
               <BarcodeTextAreaMode
                 barcodeTextLines={barcodeTextLines}
                 setBarcodeTextLines={setBarcodeTextLines}
+                setHoveredBarcodeId={setHoveredBarcodeId}
               />
             ) : (
               <BarcodeTextFrame
                 barcodeTextLines={barcodeTextLines}
                 setBarcodeTextLines={setBarcodeTextLines}
+                setHoveredBarcodeId={setHoveredBarcodeId}
               />
             )}
             <Button onClick={() => setTextAreaMode(!textAreaMode)}>

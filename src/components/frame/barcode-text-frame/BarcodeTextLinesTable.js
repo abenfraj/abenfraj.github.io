@@ -10,6 +10,8 @@ const BarcodeTextLinesTable = ({
   changeType,
   handleKeyDown,
   newLineRef,
+  handleMouseEnter,
+  handleMouseLeave,
 }) => {
   return (
     <div>
@@ -19,9 +21,11 @@ const BarcodeTextLinesTable = ({
           style={{
             display: "flex",
             alignItems: "center",
-            marginBottom: "16px", // Increased spacing
-            gap: "8px", // Add space between elements
+            marginBottom: "16px",
+            gap: "8px",
           }}
+          onMouseEnter={() => handleMouseEnter(textArea.id)}
+          onMouseLeave={handleMouseLeave}
         >
           <TextareaAutosize
             style={{
