@@ -11,11 +11,13 @@ import { gapi } from "gapi-script";
 const App = () => {
   useEffect(() => {
     const start = async () => {
-      gapi.client.init({
-        clientId:
-          "858469242167-teb4fpuh4ck3kqjcqkrgm6gva9u9n0us.apps.googleusercontent.com",
-        scope: "",
-      });
+      if (!gapi.auth2.getAuthInstance()) {
+        await gapi.auth2.init({
+          clientId:
+            "858469242167-teb4fpuh4ck3kqjcqkrgm6gva9u9n0us.apps.googleusercontent.com",
+          scope: "profile email",
+        });
+      }
     };
 
     gapi.load("client:auth2", start);
