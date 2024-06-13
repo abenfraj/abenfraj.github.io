@@ -125,7 +125,10 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, hoveredBarcodeId }) => {
                 padding: "20px", // Padding inside the container to separate content from the border
               }}
             >
-              <Barcode text={barcode.text} type={barcode.type} />
+              <Barcode
+                text={barcode.prefix + barcode.text}
+                type={barcode.type}
+              />
             </Container>
           </Grid>
         ))}

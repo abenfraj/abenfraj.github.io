@@ -1,11 +1,8 @@
 import { Grid, Typography } from "@mui/material";
 import Frame from "../Frame";
 import BarcodeTextLinesTable from "./BarcodeTextLinesTable";
-import { useRef } from "react";
-import { useEffect } from "react";
-import { useState } from "react";
-import { Select, MenuItem } from "@mui/material";
-import { Button } from "@mui/material";
+import { useRef, useEffect, useState } from "react";
+import { Select, MenuItem, Button } from "@mui/material";
 import {
   loadUserPreferences,
   saveUserPreferences,
@@ -30,8 +27,24 @@ const BarcodeTextFrame = ({
   };
 
   const addNewLine = () => {
-    const newLine = { id: Date.now(), text: "", type: defaultType };
-    setBarcodeTextLines([...barcodeTextLines, newLine]);
+    const newLine = { id: Date.now(), text: "", type: defaultType, prefix: "" };
+    setBarcodeTextLines((prevLines) => [...prevLines, newLine]);
+  };
+
+  const handlePrefixChange = (id, newPrefix) => {
+    setBarcodeTextLines((prevLines) =>
+      prevLines.map((line) =>
+        line.id === id ? { ...line, prefix: newPrefix } : line
+      )
+    );
+  };
+
+  const handleTextChange = (id, newText) => {
+    setBarcodeTextLines((prevLines) =>
+      prevLines.map((line) =>
+        line.id === id ? { ...line, text: newText } : line
+      )
+    );
   };
 
   useEffect(() => {
@@ -44,7 +57,7 @@ const BarcodeTextFrame = ({
     if (newLineRef.current) {
       newLineRef.current.focus();
     }
-  }, [barcodeTextLines]);
+  }, [barcodeTextLines.length]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -92,21 +105,15 @@ const BarcodeTextFrame = ({
           barcodeTextLines={barcodeTextLines}
           handleMouseEnter={handleMouseEnter}
           handleMouseLeave={handleMouseLeave}
-          handleTextChange={(id, newText) =>
-            setBarcodeTextLines(
-              barcodeTextLines.map((line) =>
-                line.id === id ? { ...line, text: newText } : line
-              )
-            )
-          }
+          handleTextChange={handleTextChange}
           deleteLine={(id) =>
-            setBarcodeTextLines(
-              barcodeTextLines.filter((line) => line.id !== id)
+            setBarcodeTextLines((prevLines) =>
+              prevLines.filter((line) => line.id !== id)
             )
           }
           changeType={(id, newType) =>
-            setBarcodeTextLines(
-              barcodeTextLines.map((line) =>
+            setBarcodeTextLines((prevLines) =>
+              prevLines.map((line) =>
                 line.id === id ? { ...line, type: newType } : line
               )
             )
@@ -118,6 +125,7 @@ const BarcodeTextFrame = ({
             }
           }}
           newLineRef={newLineRef}
+          handlePrefixChange={handlePrefixChange}
         />
         <div
           style={{

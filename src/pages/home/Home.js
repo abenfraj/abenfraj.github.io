@@ -12,6 +12,7 @@ const Home = () => {
   const [barcodeTextLines, setBarcodeTextLines] = useState([]);
   const [hoveredBarcodeId, setHoveredBarcodeId] = useState(null);
   const [textAreaMode, setTextAreaMode] = useState(false);
+  const [forceRender, setForceRender] = useState(false);
   const db = getFirestore();
 
   useEffect(() => {
@@ -32,6 +33,7 @@ const Home = () => {
   const handleModeChange = async () => {
     const newMode = !textAreaMode;
     setTextAreaMode(newMode);
+    setForceRender((prev) => !prev); // Trigger a re-render by toggling forceRender state
 
     const user = auth.currentUser;
     if (user) {
@@ -52,6 +54,7 @@ const Home = () => {
         }}
       >
         <BarcodeDisplayFrame
+          key={forceRender} // Use forceRender state to control re-rendering
           barcodeTextLines={barcodeTextLines}
           hoveredBarcodeId={hoveredBarcodeId}
         />

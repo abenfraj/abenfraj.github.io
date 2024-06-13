@@ -1,3 +1,9 @@
+.textarea-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #1976d2 rgba(0, 0, 0, 0.1);
+  /* For Firefox */
+}
+
 .textarea-scrollbar::-webkit-scrollbar {
   width: 8px;
   background-color: rgba(0, 0, 0, 0.1);

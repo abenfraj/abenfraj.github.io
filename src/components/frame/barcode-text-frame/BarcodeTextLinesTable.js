@@ -12,6 +12,7 @@ const BarcodeTextLinesTable = ({
   newLineRef,
   handleMouseEnter,
   handleMouseLeave,
+  handlePrefixChange,
 }) => {
   return (
     <div>
@@ -27,9 +28,22 @@ const BarcodeTextLinesTable = ({
           onMouseEnter={() => handleMouseEnter(textArea.id)}
           onMouseLeave={handleMouseLeave}
         >
+          <input
+            type="text"
+            value={textArea.prefix || ""}
+            onChange={(e) => handlePrefixChange(textArea.id, e.target.value)}
+            style={{
+              width: "10%", // Adjust based on your layout
+              padding: "9px 10px",
+              border: "2px solid #1976d2", // Match the input border
+              borderRadius: "4px", // Consistent with MUI
+              fontFamily: "Roboto, sans-serif", // Ensure font consistency
+              fontSize: "0.875rem", // Match MUI typography
+            }}
+          />
           <TextareaAutosize
             style={{
-              width: "70%", // Adjust based on your layout
+              width: "60%", // Adjust based on your layout
               resize: "none",
               padding: "10px", // Add some padding for text area
               border: "2px solid #1976d2", // Use MUI primary color for border
@@ -38,6 +52,7 @@ const BarcodeTextLinesTable = ({
               fontSize: "0.875rem", // Match MUI typography
             }}
             value={textArea.text}
+            spellCheck={false}
             onKeyDown={(e) => handleKeyDown(e, textArea.id)}
             onChange={(e) => handleTextChange(textArea.id, e.target.value)}
             ref={index === barcodeTextLines.length - 1 ? newLineRef : null}
