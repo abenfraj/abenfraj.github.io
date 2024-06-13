@@ -42,6 +42,17 @@ const Home = () => {
     }
   };
 
+  const addNewLine = () => {
+    const newLine = {
+      id: Date.now(),
+      title: "New Barcode", // Add title here
+      text: "",
+      type: "QR",
+      prefix: "",
+    };
+    setBarcodeTextLines((prevLines) => [...prevLines, newLine]);
+  };
+
   return (
     <Container maxWidth="false" sx={{ height: "100%", width: "100%" }}>
       <Grid
@@ -56,6 +67,7 @@ const Home = () => {
         <BarcodeDisplayFrame
           key={forceRender} // Use forceRender state to control re-rendering
           barcodeTextLines={barcodeTextLines}
+          setBarcodeTextLines={setBarcodeTextLines}
           hoveredBarcodeId={hoveredBarcodeId}
         />
         <Grid item xs={12} lg={4} sx={{ height: "100%" }}>

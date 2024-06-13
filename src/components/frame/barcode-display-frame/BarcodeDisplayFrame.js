@@ -5,7 +5,7 @@ import { Grid } from "@mui/material";
 import Frame from "../Frame";
 import { Container } from "@mui/material";
 
-const Barcode = ({ text, type }) => {
+const Barcode = ({ title, text, type, onTitleChange }) => {
   const canvasRef = useRef();
 
   useEffect(() => {
@@ -36,6 +36,21 @@ const Barcode = ({ text, type }) => {
         height: "100%",
       }}
     >
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => onTitleChange(e.target.value)}
+        placeholder="Enter title"
+        style={{
+          width: "80%",
+          padding: "5px",
+          marginBottom: "10px",
+          fontSize: "1rem",
+          textAlign: "center",
+          border: "1px solid #ccc",
+          borderRadius: "4px",
+        }}
+      />
       {type === "QR" ? (
         <QRCodeSVG value={text || " "} style={barcodeStyle} />
       ) : (
@@ -57,7 +72,11 @@ const Barcode = ({ text, type }) => {
   );
 };
 
-const BarcodeDisplayFrame = ({ barcodeTextLines, hoveredBarcodeId }) => {
+const BarcodeDisplayFrame = ({
+  barcodeTextLines,
+  setBarcodeTextLines,
+  hoveredBarcodeId,
+}) => {
   const barcodeRefs = useRef({});
 
   useEffect(() => {
@@ -69,6 +88,14 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, hoveredBarcodeId }) => {
       });
     }
   }, [hoveredBarcodeId]);
+
+  const handleTitleChange = (id, newTitle) => {
+    setBarcodeTextLines((prevLines) =>
+      prevLines.map((line) =>
+        line.id === id ? { ...line, title: newTitle } : line
+      )
+    );
+  };
 
   return (
     <Frame
@@ -126,8 +153,12 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, hoveredBarcodeId }) => {
               }}
             >
               <Barcode
+                title={barcode.title}
                 text={barcode.prefix + barcode.text}
                 type={barcode.type}
+                onTitleChange={(newTitle) =>
+                  handleTitleChange(barcode.id, newTitle)
+                }
               />
             </Container>
           </Grid>
