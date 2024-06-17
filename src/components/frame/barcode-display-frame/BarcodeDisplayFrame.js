@@ -1,11 +1,12 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
 import QRCodeSVG from "qrcode.react";
-import { Grid } from "@mui/material";
-import Frame from "../Frame";
+import { Grid, Button, Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";import Frame from "../Frame";
 import { Container } from "@mui/material";
+import "./BarcodeDisplayFrame.css";
 
-const Barcode = ({ title, text, type, onTitleChange }) => {
+const Barcode = ({ title, text, type, onTitleChange, style }) => {
   const canvasRef = useRef();
 
   useEffect(() => {
@@ -23,6 +24,7 @@ const Barcode = ({ title, text, type, onTitleChange }) => {
     maxWidth: "100%",
     height: "auto",
     overflow: "hidden",
+    ...style,
   };
 
   return (
@@ -72,12 +74,87 @@ const Barcode = ({ title, text, type, onTitleChange }) => {
   );
 };
 
+const BurstModePopup = ({ open, onClose, barcodeTextLines }) => {
+  const [countdown, setCountdown] = useState(3);
+  const [currentBarcode, setCurrentBarcode] = useState(-1);
+
+  useEffect(() => {
+    if (open) {
+      setCountdown(3);
+      setCurrentBarcode(-1);
+      const interval = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev === 1) {
+            clearInterval(interval);
+            setCurrentBarcode(0);
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (currentBarcode >= 0 && open) {
+      const interval = setInterval(() => {
+        setCurrentBarcode((prev) => {
+          if (prev === barcodeTextLines.length - 1) {
+            clearInterval(interval);
+            setTimeout(onClose, 300); // Close the popup after a brief delay to show the last barcode
+          }
+          return prev + 1;
+        });
+      }, 300);
+      return () => clearInterval(interval);
+    }
+  }, [currentBarcode, open, barcodeTextLines.length, onClose]);
+
+  return (
+    <Dialog open={open} onClose={onClose} disableBackdropClick>
+      <DialogTitle>
+        Burst Mode
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent>
+        {countdown > 0 ? (
+          <>
+            <div className="countdown">{countdown}</div>
+            <div className="barcode-count">Number of barcodes: {barcodeTextLines.length}</div>
+          </>
+        ) : (
+          barcodeTextLines[currentBarcode] && (
+            <Barcode
+              title={barcodeTextLines[currentBarcode].title}
+              text={barcodeTextLines[currentBarcode].prefix + barcodeTextLines[currentBarcode].text}
+              type={barcodeTextLines[currentBarcode].type}
+              onTitleChange={() => {}}
+              style={{ width: '200%', height: '200%' }} // Make barcodes larger
+            />
+          )
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const BarcodeDisplayFrame = ({
   barcodeTextLines,
   setBarcodeTextLines,
   hoveredBarcodeId,
 }) => {
   const barcodeRefs = useRef({});
+  const [burstModeOpen, setBurstModeOpen] = useState(false);
 
   useEffect(() => {
     if (hoveredBarcodeId && barcodeRefs.current[hoveredBarcodeId]) {
@@ -106,6 +183,14 @@ const BarcodeDisplayFrame = ({
         overflow: "auto",
       }}
     >
+      <Button
+        variant="contained"
+        color="primary"
+        onClick={() => setBurstModeOpen(true)}
+        style={{ marginBottom: "10px" }}
+      >
+        Burst Mode
+      </Button>
       <Grid
         container
         style={{
@@ -127,7 +212,7 @@ const BarcodeDisplayFrame = ({
             style={{
               display: "flex",
               flexDirection: "column",
-              padding: "1rem", // Outer padding around the container
+              padding: "1rem",
               transition: "all 0.3s ease",
             }}
           >
@@ -149,7 +234,7 @@ const BarcodeDisplayFrame = ({
                 borderRadius: "8px",
                 transition:
                   "border 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease",
-                padding: "20px", // Padding inside the container to separate content from the border
+                padding: "20px",
               }}
             >
               <Barcode
@@ -164,6 +249,11 @@ const BarcodeDisplayFrame = ({
           </Grid>
         ))}
       </Grid>
+      <BurstModePopup
+        open={burstModeOpen}
+        onClose={() => setBurstModeOpen(false)}
+        barcodeTextLines={barcodeTextLines}
+      />
     </Frame>
   );
 };
