@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
 import QRCodeSVG from "qrcode.react";
-import { Grid, Button, Dialog, DialogContent, DialogTitle, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";import Frame from "../Frame";
+import { Grid, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField, Divider } from "@mui/material";
+import { styled } from "@mui/system";
+import CloseIcon from "@mui/icons-material/Close";
+import Frame from "../Frame";
 import { Container } from "@mui/material";
 import "./BarcodeDisplayFrame.css";
 
-const Barcode = ({ title, text, type, onTitleChange, style }) => {
+const Barcode = ({ title, text, type, onTitleChange, style, showInput }) => {
   const canvasRef = useRef();
 
   useEffect(() => {
@@ -24,7 +26,7 @@ const Barcode = ({ title, text, type, onTitleChange, style }) => {
     maxWidth: "100%",
     height: "auto",
     overflow: "hidden",
-    ...style,
+    ...style, // Apply additional styles if provided
   };
 
   return (
@@ -38,21 +40,23 @@ const Barcode = ({ title, text, type, onTitleChange, style }) => {
         height: "100%",
       }}
     >
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => onTitleChange(e.target.value)}
-        placeholder="Enter title"
-        style={{
-          width: "80%",
-          padding: "5px",
-          marginBottom: "10px",
-          fontSize: "1rem",
-          textAlign: "center",
-          border: "1px solid #ccc",
-          borderRadius: "4px",
-        }}
-      />
+      {showInput && (
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          placeholder="Enter title"
+          style={{
+            width: "80%",
+            padding: "5px",
+            marginBottom: "10px",
+            fontSize: "1rem",
+            textAlign: "center",
+            border: "1px solid #ccc",
+            borderRadius: "4px",
+          }}
+        />
+      )}
       {type === "QR" ? (
         <QRCodeSVG value={text || " "} style={barcodeStyle} />
       ) : (
@@ -74,7 +78,17 @@ const Barcode = ({ title, text, type, onTitleChange, style }) => {
   );
 };
 
-const BurstModePopup = ({ open, onClose, barcodeTextLines }) => {
+const StyledDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialog-paper': {
+    minWidth: '50rem',
+    minHeight: '50rem',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+}));
+
+const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize }) => {
   const [countdown, setCountdown] = useState(3);
   const [currentBarcode, setCurrentBarcode] = useState(-1);
 
@@ -97,21 +111,22 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines }) => {
 
   useEffect(() => {
     if (currentBarcode >= 0 && open) {
-      const interval = setInterval(() => {
+      const intervalId = setInterval(() => {
         setCurrentBarcode((prev) => {
-          if (prev === barcodeTextLines.length - 1) {
-            clearInterval(interval);
-            setTimeout(onClose, 300); // Close the popup after a brief delay to show the last barcode
+          if (prev >= barcodeTextLines.length - 1) {
+            clearInterval(intervalId);
+            setTimeout(onClose, interval); // Close the popup after a brief delay to show the last barcode
+            return prev;
           }
           return prev + 1;
         });
-      }, 300);
-      return () => clearInterval(interval);
+      }, interval);
+      return () => clearInterval(intervalId);
     }
-  }, [currentBarcode, open, barcodeTextLines.length, onClose]);
+  }, [currentBarcode, open, barcodeTextLines.length, interval, onClose]);
 
   return (
-    <Dialog open={open} onClose={onClose} disableBackdropClick>
+    <StyledDialog open={open} onClose={onClose} disableBackdropClick>
       <DialogTitle>
         Burst Mode
         <IconButton
@@ -126,25 +141,26 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines }) => {
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent>
+      <DialogContent style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
         {countdown > 0 ? (
           <>
             <div className="countdown">{countdown}</div>
             <div className="barcode-count">Number of barcodes: {barcodeTextLines.length}</div>
           </>
         ) : (
-          barcodeTextLines[currentBarcode] && (
+          currentBarcode >= 0 && barcodeTextLines[currentBarcode] && (
             <Barcode
               title={barcodeTextLines[currentBarcode].title}
               text={barcodeTextLines[currentBarcode].prefix + barcodeTextLines[currentBarcode].text}
               type={barcodeTextLines[currentBarcode].type}
               onTitleChange={() => {}}
-              style={{ width: '200%', height: '200%' }} // Make barcodes larger
+              style={{ width: `${barcodeSize * 3}%`, height: barcodeTextLines[currentBarcode].type === 'QR' ? 'auto' : `${barcodeSize * 3}%` }} // Make barcodes larger based on the selected size and maintain aspect ratio for QR codes
+              showInput={false}
             />
           )
         )}
       </DialogContent>
-    </Dialog>
+    </StyledDialog>
   );
 };
 
@@ -155,6 +171,8 @@ const BarcodeDisplayFrame = ({
 }) => {
   const barcodeRefs = useRef({});
   const [burstModeOpen, setBurstModeOpen] = useState(false);
+  const [interval, setInterval] = useState(300); // Default interval time
+  const [barcodeSize, setBarcodeSize] = useState(30); // Default barcode size percentage set to 30
 
   useEffect(() => {
     if (hoveredBarcodeId && barcodeRefs.current[hoveredBarcodeId]) {
@@ -181,16 +199,35 @@ const BarcodeDisplayFrame = ({
         width: "60%",
         marginRight: "1rem",
         overflow: "auto",
+        position: 'relative',
       }}
     >
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={() => setBurstModeOpen(true)}
-        style={{ marginBottom: "10px" }}
-      >
-        Burst Mode
-      </Button>
+      <div className="fixed-header">
+        <div className="header-controls">
+          <TextField
+            label="Interval (ms)"
+            type="number"
+            value={interval}
+            onChange={(e) => setInterval(Number(e.target.value))}
+            style={{ marginRight: "10px" }}
+          />
+          <TextField
+            label="Barcode Size (%)"
+            type="number"
+            value={barcodeSize}
+            onChange={(e) => setBarcodeSize(Number(e.target.value))}
+            style={{ marginRight: "10px" }}
+          />
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => setBurstModeOpen(true)}
+          >
+            Burst Mode
+          </Button>
+        </div>
+        <Divider style={{ width: "100%", marginTop: "10px" }} />
+      </div>
       <Grid
         container
         style={{
@@ -244,6 +281,8 @@ const BarcodeDisplayFrame = ({
                 onTitleChange={(newTitle) =>
                   handleTitleChange(barcode.id, newTitle)
                 }
+                showInput={true} // Show the title input box in the main display
+                style={{ width: `${barcodeSize}%`, height: barcode.type === 'QR' ? 'auto' : `${barcodeSize}%` }} // Set the size based on the selected percentage and maintain aspect ratio for QR codes
               />
             </Container>
           </Grid>
@@ -253,6 +292,8 @@ const BarcodeDisplayFrame = ({
         open={burstModeOpen}
         onClose={() => setBurstModeOpen(false)}
         barcodeTextLines={barcodeTextLines}
+        interval={interval}
+        barcodeSize={barcodeSize}
       />
     </Frame>
   );
