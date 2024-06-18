@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
 import QRCodeSVG from "qrcode.react";
-import { Grid, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField, Divider } from "@mui/material";
+import { Grid, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField, Divider, Tooltip, Switch, FormControlLabel } from "@mui/material";
 import { styled } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
 import Frame from "../Frame";
@@ -26,7 +26,7 @@ const Barcode = ({ title, text, type, onTitleChange, style, showInput }) => {
     maxWidth: "100%",
     height: "auto",
     overflow: "hidden",
-    ...style, // Apply additional styles if provided
+    ...style,
   };
 
   return (
@@ -45,7 +45,7 @@ const Barcode = ({ title, text, type, onTitleChange, style, showInput }) => {
           type="text"
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
-          placeholder="Enter title"
+          placeholder="Add note"
           style={{
             width: "80%",
             padding: "5px",
@@ -115,7 +115,7 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize
         setCurrentBarcode((prev) => {
           if (prev >= barcodeTextLines.length - 1) {
             clearInterval(intervalId);
-            setTimeout(onClose, interval); // Close the popup after a brief delay to show the last barcode
+            setTimeout(onClose, interval);
             return prev;
           }
           return prev + 1;
@@ -154,7 +154,7 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize
               text={barcodeTextLines[currentBarcode].prefix + barcodeTextLines[currentBarcode].text}
               type={barcodeTextLines[currentBarcode].type}
               onTitleChange={() => {}}
-              style={{ width: `${barcodeSize * 3}%`, height: barcodeTextLines[currentBarcode].type === 'QR' ? 'auto' : `${barcodeSize * 3}%` }} // Make barcodes larger based on the selected size and maintain aspect ratio for QR codes
+              style={{ width: `${barcodeSize * 3}%`, height: barcodeTextLines[currentBarcode].type === 'QR' ? 'auto' : `${barcodeSize * 3}%` }}
               showInput={false}
             />
           )
@@ -164,15 +164,12 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize
   );
 };
 
-const BarcodeDisplayFrame = ({
-  barcodeTextLines,
-  setBarcodeTextLines,
-  hoveredBarcodeId,
-}) => {
+const BarcodeDisplayFrame = ({ barcodeTextLines, setBarcodeTextLines, hoveredBarcodeId }) => {
   const barcodeRefs = useRef({});
   const [burstModeOpen, setBurstModeOpen] = useState(false);
-  const [interval, setInterval] = useState(300); // Default interval time
-  const [barcodeSize, setBarcodeSize] = useState(30); // Default barcode size percentage set to 30
+  const [interval, setInterval] = useState(300);
+  const [barcodeSize, setBarcodeSize] = useState(30);
+  const [showTitleInput, setShowTitleInput] = useState(true);
 
   useEffect(() => {
     if (hoveredBarcodeId && barcodeRefs.current[hoveredBarcodeId]) {
@@ -203,28 +200,41 @@ const BarcodeDisplayFrame = ({
       }}
     >
       <div className="fixed-header">
-        <div className="header-controls">
-          <TextField
-            label="Interval (ms)"
-            type="number"
-            value={interval}
-            onChange={(e) => setInterval(Number(e.target.value))}
-            style={{ marginRight: "10px" }}
+        <div className="header-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '90%' }}>
+          <FormControlLabel
+            control={<Switch checked={showTitleInput} onChange={() => setShowTitleInput(!showTitleInput)} />}
+            label="Show Notes"
+            style={{ marginRight: "20px" }}
           />
-          <TextField
-            label="Barcode Size (%)"
-            type="number"
-            value={barcodeSize}
-            onChange={(e) => setBarcodeSize(Number(e.target.value))}
-            style={{ marginRight: "10px" }}
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => setBurstModeOpen(true)}
-          >
-            Burst Mode
-          </Button>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Tooltip title="Set the size of the barcodes as a percentage of their original size.">
+              <TextField
+                label="Barcode Size (%)"
+                type="number"
+                value={barcodeSize}
+                onChange={(e) => setBarcodeSize(Number(e.target.value))}
+                style={{ marginRight: "10px" }}
+              />
+            </Tooltip>
+            <Tooltip title="Set the interval time in milliseconds between displaying each barcode in burst mode.">
+              <TextField
+                label="Burst mode interval (ms)"
+                type="number"
+                value={interval}
+                onChange={(e) => setInterval(Number(e.target.value))}
+                style={{ marginRight: "10px" }}
+              />
+            </Tooltip>
+            <Tooltip title="Start burst mode to display each barcode at the specified interval.">
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setBurstModeOpen(true)}
+              >
+                Burst Mode
+              </Button>
+            </Tooltip>
+          </div>
         </div>
         <Divider style={{ width: "100%", marginTop: "10px" }} />
       </div>
@@ -281,8 +291,8 @@ const BarcodeDisplayFrame = ({
                 onTitleChange={(newTitle) =>
                   handleTitleChange(barcode.id, newTitle)
                 }
-                showInput={true} // Show the title input box in the main display
-                style={{ width: `${barcodeSize}%`, height: barcode.type === 'QR' ? 'auto' : `${barcodeSize}%` }} // Set the size based on the selected percentage and maintain aspect ratio for QR codes
+                showInput={showTitleInput}
+                style={{ width: `${barcodeSize}%`, height: barcode.type === 'QR' ? 'auto' : `${barcodeSize}%` }}
               />
             </Container>
           </Grid>

@@ -30,6 +30,7 @@ const BarcodeTextLinesTable = ({
         >
           <input
             type="text"
+            placeholder="Prefix"
             value={textArea.prefix || ""}
             onChange={(e) => handlePrefixChange(textArea.id, e.target.value)}
             style={{
@@ -51,6 +52,7 @@ const BarcodeTextLinesTable = ({
               fontFamily: "Roboto, sans-serif", // Ensure font consistency
               fontSize: "0.875rem", // Match MUI typography
             }}
+            placeholder="Barcode"
             value={textArea.text}
             spellCheck={false}
             onKeyDown={(e) => handleKeyDown(e, textArea.id)}

@@ -49,9 +49,9 @@ const BarcodeTextFrame = ({
 
   useEffect(() => {
     if (barcodeTextLines.length === 0) {
-      addNewLine();
+      setBarcodeTextLines([{ id: Date.now(), text: "", type: defaultType, prefix: "" }]);
     }
-  }, []);
+  }, []); // Run only once on component mount
 
   useEffect(() => {
     if (newLineRef.current) {
