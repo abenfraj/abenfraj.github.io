@@ -13,6 +13,9 @@ const Home = () => {
   const [hoveredBarcodeId, setHoveredBarcodeId] = useState(null);
   const [textAreaMode, setTextAreaMode] = useState(false);
   const [forceRender, setForceRender] = useState(false);
+  const [showTitleInput, setShowTitleInput] = useState(true);
+  const [burstModeInterval, setBurstModeInterval] = useState(300);
+  const [barcodeSize, setBarcodeSize] = useState(30);
   const db = getFirestore();
 
   useEffect(() => {
@@ -21,7 +24,11 @@ const Home = () => {
         const modeDoc = doc(db, "userSettings", user.uid);
         const docSnap = await getDoc(modeDoc);
         if (docSnap.exists()) {
-          setTextAreaMode(docSnap.data().textAreaMode);
+          const data = docSnap.data();
+          setTextAreaMode(data.textAreaMode);
+          setShowTitleInput(data.showTitleInput ?? true);
+          setBurstModeInterval(data.burstModeInterval ?? 300);
+          setBarcodeSize(data.barcodeSize ?? 30);
         } else {
           setTextAreaMode(false);
         }
@@ -39,6 +46,45 @@ const Home = () => {
     if (user) {
       const modeDoc = doc(db, "userSettings", user.uid);
       await setDoc(modeDoc, { textAreaMode: newMode }, { merge: true });
+    }
+  };
+
+  const handleShowTitleInputChange = async () => {
+    const newShowTitleInput = !showTitleInput;
+    setShowTitleInput(newShowTitleInput);
+
+    const user = auth.currentUser;
+    if (user) {
+      const modeDoc = doc(db, "userSettings", user.uid);
+      await setDoc(
+        modeDoc,
+        { showTitleInput: newShowTitleInput },
+        { merge: true }
+      );
+    }
+  };
+
+  const handleBurstModeIntervalChange = async (newInterval) => {
+    setBurstModeInterval(newInterval);
+
+    const user = auth.currentUser;
+    if (user) {
+      const modeDoc = doc(db, "userSettings", user.uid);
+      await setDoc(
+        modeDoc,
+        { burstModeInterval: newInterval },
+        { merge: true }
+      );
+    }
+  };
+
+  const handleBarcodeSizeChange = async (newSize) => {
+    setBarcodeSize(newSize);
+
+    const user = auth.currentUser;
+    if (user) {
+      const modeDoc = doc(db, "userSettings", user.uid);
+      await setDoc(modeDoc, { barcodeSize: newSize }, { merge: true });
     }
   };
 
@@ -69,6 +115,13 @@ const Home = () => {
           barcodeTextLines={barcodeTextLines}
           setBarcodeTextLines={setBarcodeTextLines}
           hoveredBarcodeId={hoveredBarcodeId}
+          textAreaMode={textAreaMode} // Pass textAreaMode as a prop
+          showTitleInput={showTitleInput}
+          burstModeInterval={burstModeInterval}
+          barcodeSize={barcodeSize}
+          onShowTitleInputChange={handleShowTitleInputChange}
+          onBurstModeIntervalChange={handleBurstModeIntervalChange}
+          onBarcodeSizeChange={handleBarcodeSizeChange}
         />
         <Grid item xs={12} lg={4} sx={{ height: "100%" }}>
           <Grid

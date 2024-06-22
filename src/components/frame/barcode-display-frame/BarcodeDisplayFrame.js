@@ -1,7 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import JsBarcode from "jsbarcode";
 import QRCodeSVG from "qrcode.react";
-import { Grid, Button, Dialog, DialogContent, DialogTitle, IconButton, TextField, Divider, Tooltip, Switch, FormControlLabel } from "@mui/material";
+import {
+  Grid,
+  Button,
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  IconButton,
+  TextField,
+  Divider,
+  Tooltip,
+  Switch,
+  FormControlLabel,
+} from "@mui/material";
 import { styled } from "@mui/system";
 import CloseIcon from "@mui/icons-material/Close";
 import Frame from "../Frame";
@@ -79,16 +91,22 @@ const Barcode = ({ title, text, type, onTitleChange, style, showInput }) => {
 };
 
 const StyledDialog = styled(Dialog)(({ theme }) => ({
-  '& .MuiDialog-paper': {
-    minWidth: '50rem',
-    minHeight: '50rem',
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
+  "& .MuiDialog-paper": {
+    minWidth: "50rem",
+    minHeight: "50rem",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
   },
 }));
 
-const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize }) => {
+const BurstModePopup = ({
+  open,
+  onClose,
+  barcodeTextLines,
+  interval,
+  barcodeSize,
+}) => {
   const [countdown, setCountdown] = useState(3);
   const [currentBarcode, setCurrentBarcode] = useState(-1);
 
@@ -133,7 +151,7 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize
           aria-label="close"
           onClick={onClose}
           style={{
-            position: 'absolute',
+            position: "absolute",
             right: 8,
             top: 8,
           }}
@@ -141,20 +159,39 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize
           <CloseIcon />
         </IconButton>
       </DialogTitle>
-      <DialogContent style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+      <DialogContent
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexDirection: "column",
+        }}
+      >
         {countdown > 0 ? (
           <>
             <div className="countdown">{countdown}</div>
-            <div className="barcode-count">Number of barcodes: {barcodeTextLines.length}</div>
+            <div className="barcode-count">
+              Number of barcodes: {barcodeTextLines.length}
+            </div>
           </>
         ) : (
-          currentBarcode >= 0 && barcodeTextLines[currentBarcode] && (
+          currentBarcode >= 0 &&
+          barcodeTextLines[currentBarcode] && (
             <Barcode
               title={barcodeTextLines[currentBarcode].title}
-              text={barcodeTextLines[currentBarcode].prefix + barcodeTextLines[currentBarcode].text}
+              text={
+                barcodeTextLines[currentBarcode].prefix +
+                barcodeTextLines[currentBarcode].text
+              }
               type={barcodeTextLines[currentBarcode].type}
               onTitleChange={() => {}}
-              style={{ width: `${barcodeSize * 3}%`, height: barcodeTextLines[currentBarcode].type === 'QR' ? 'auto' : `${barcodeSize * 3}%` }}
+              style={{
+                width: `${barcodeSize * 3}%`,
+                height:
+                  barcodeTextLines[currentBarcode].type === "QR"
+                    ? "auto"
+                    : `${barcodeSize * 3}%`,
+              }}
               showInput={false}
             />
           )
@@ -164,12 +201,20 @@ const BurstModePopup = ({ open, onClose, barcodeTextLines, interval, barcodeSize
   );
 };
 
-const BarcodeDisplayFrame = ({ barcodeTextLines, setBarcodeTextLines, hoveredBarcodeId }) => {
+const BarcodeDisplayFrame = ({
+  barcodeTextLines,
+  setBarcodeTextLines,
+  hoveredBarcodeId,
+  textAreaMode,
+  showTitleInput,
+  burstModeInterval,
+  barcodeSize,
+  onShowTitleInputChange,
+  onBurstModeIntervalChange,
+  onBarcodeSizeChange,
+}) => {
   const barcodeRefs = useRef({});
   const [burstModeOpen, setBurstModeOpen] = useState(false);
-  const [interval, setInterval] = useState(300);
-  const [barcodeSize, setBarcodeSize] = useState(30);
-  const [showTitleInput, setShowTitleInput] = useState(true);
 
   useEffect(() => {
     if (hoveredBarcodeId && barcodeRefs.current[hoveredBarcodeId]) {
@@ -196,23 +241,36 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, setBarcodeTextLines, hoveredBar
         width: "60%",
         marginRight: "1rem",
         overflow: "auto",
-        position: 'relative',
+        position: "relative",
       }}
     >
       <div className="fixed-header">
-        <div className="header-controls" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '90%' }}>
+        <div
+          className="header-controls"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            width: "90%",
+          }}
+        >
           <FormControlLabel
-            control={<Switch checked={showTitleInput} onChange={() => setShowTitleInput(!showTitleInput)} />}
+            control={
+              <Switch
+                checked={showTitleInput}
+                onChange={onShowTitleInputChange}
+              />
+            }
             label="Show Notes"
             style={{ marginRight: "20px" }}
           />
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div style={{ display: "flex", alignItems: "center" }}>
             <Tooltip title="Set the size of the barcodes as a percentage of their original size.">
               <TextField
                 label="Barcode Size (%)"
                 type="number"
                 value={barcodeSize}
-                onChange={(e) => setBarcodeSize(Number(e.target.value))}
+                onChange={(e) => onBarcodeSizeChange(Number(e.target.value))}
                 style={{ marginRight: "10px" }}
               />
             </Tooltip>
@@ -220,8 +278,10 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, setBarcodeTextLines, hoveredBar
               <TextField
                 label="Burst mode interval (ms)"
                 type="number"
-                value={interval}
-                onChange={(e) => setInterval(Number(e.target.value))}
+                value={burstModeInterval}
+                onChange={(e) =>
+                  onBurstModeIntervalChange(Number(e.target.value))
+                }
                 style={{ marginRight: "10px" }}
               />
             </Tooltip>
@@ -292,7 +352,10 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, setBarcodeTextLines, hoveredBar
                   handleTitleChange(barcode.id, newTitle)
                 }
                 showInput={showTitleInput}
-                style={{ width: `${barcodeSize}%`, height: barcode.type === 'QR' ? 'auto' : `${barcodeSize}%` }}
+                style={{
+                  width: `${barcodeSize}%`,
+                  height: barcode.type === "QR" ? "auto" : `${barcodeSize}%`,
+                }}
               />
             </Container>
           </Grid>
@@ -302,7 +365,7 @@ const BarcodeDisplayFrame = ({ barcodeTextLines, setBarcodeTextLines, hoveredBar
         open={burstModeOpen}
         onClose={() => setBurstModeOpen(false)}
         barcodeTextLines={barcodeTextLines}
-        interval={interval}
+        interval={burstModeInterval}
         barcodeSize={barcodeSize}
       />
     </Frame>
