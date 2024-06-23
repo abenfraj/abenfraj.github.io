@@ -1,6 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import { Container, Grid, Button, Box } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Button,
+  Box,
+  Collapse,
+  IconButton,
+} from "@mui/material";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "../../firebase/firebase-config";
 import BarcodeDisplayFrame from "../../components/frame/barcode-display-frame/BarcodeDisplayFrame";
@@ -8,6 +14,8 @@ import BarcodeTextFrame from "../../components/frame/barcode-text-frame/BarcodeT
 import BarcodeTextAreaMode from "../../components/frame/barcode-text-area-mode/BarcodeTextAreaMode";
 import HistoryFrame from "../../components/frame/history-frame/HistoryFrame";
 import StashFrame from "../../components/frame/stash-frame/StashFrame";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 
 const Home = ({ tabId }) => {
   const [barcodeTextLines, setBarcodeTextLines] = useState([]);
@@ -17,6 +25,7 @@ const Home = ({ tabId }) => {
   const [showTitleInput, setShowTitleInput] = useState(true);
   const [burstModeInterval, setBurstModeInterval] = useState(300);
   const [barcodeSize, setBarcodeSize] = useState(30);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const db = getFirestore();
 
   useEffect(() => {
@@ -29,7 +38,6 @@ const Home = ({ tabId }) => {
       setBurstModeInterval(state.burstModeInterval);
       setBarcodeSize(state.barcodeSize);
     } else {
-      // Reset state if there's no saved state
       setBarcodeTextLines([]);
       setTextAreaMode(false);
       setShowTitleInput(true);
@@ -137,6 +145,10 @@ const Home = ({ tabId }) => {
     setBarcodeTextLines((prevLines) => [...prevLines, newLine]);
   };
 
+  const toggleCollapse = () => {
+    setIsCollapsed((prev) => !prev);
+  };
+
   return (
     <Container maxWidth="false" sx={{ height: "100%", width: "100%" }}>
       <Grid
@@ -187,18 +199,23 @@ const Home = ({ tabId }) => {
             <Button onClick={handleModeChange}>
               Switch to {textAreaMode ? "Individual Line" : "Text Area"} Mode
             </Button>
-            <Grid
-              container
-              direction="row"
-              sx={{
-                height: "40%",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <StashFrame />
-              <HistoryFrame />
-            </Grid>
+            <IconButton onClick={toggleCollapse}>
+              {isCollapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+            </IconButton>
+            <Collapse in={!isCollapsed} sx={{ width: "100%" }}>
+              <Grid
+                container
+                direction="row"
+                sx={{
+                  height: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <StashFrame />
+                <HistoryFrame />
+              </Grid>
+            </Collapse>
           </Grid>
         </Grid>
       </Grid>
