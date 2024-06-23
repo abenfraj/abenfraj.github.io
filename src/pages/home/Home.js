@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Container,
-  Grid,
-  Button,
-  Box,
-  Collapse,
-  IconButton,
-} from "@mui/material";
+import { Container, Grid, Button, Collapse, IconButton } from "@mui/material";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { auth } from "../../firebase/firebase-config";
 import BarcodeDisplayFrame from "../../components/frame/barcode-display-frame/BarcodeDisplayFrame";
@@ -188,12 +181,14 @@ const Home = ({ tabId }) => {
                 barcodeTextLines={barcodeTextLines}
                 setBarcodeTextLines={setBarcodeTextLines}
                 setHoveredBarcodeId={setHoveredBarcodeId}
+                isCollapsed={isCollapsed}
               />
             ) : (
               <BarcodeTextFrame
                 barcodeTextLines={barcodeTextLines}
                 setBarcodeTextLines={setBarcodeTextLines}
                 setHoveredBarcodeId={setHoveredBarcodeId}
+                isCollapsed={isCollapsed}
               />
             )}
             <Button onClick={handleModeChange}>

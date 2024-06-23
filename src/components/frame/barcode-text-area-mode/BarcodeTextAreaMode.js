@@ -13,8 +13,7 @@ import {
   loadUserPreferences,
   saveUserPreferences,
 } from "../../../firebase/firebaseService";
-
-import "../../../App.css"; //
+import { Transition } from "react-transition-group";
 
 const CustomTextareaAutosize = styled(TextareaAutosize)({
   width: "80%",
@@ -43,10 +42,25 @@ const CustomTextareaAutosize = styled(TextareaAutosize)({
   },
 });
 
+const duration = 300;
+
+const defaultStyle = {
+  transition: `height ${duration}ms ease-in-out`,
+  height: "50%",
+};
+
+const transitionStyles = {
+  entering: { height: "80%" },
+  entered: { height: "80%" },
+  exiting: { height: "35%" },
+  exited: { height: "35%" },
+};
+
 const BarcodeTextAreaMode = ({
   barcodeTextLines,
   setBarcodeTextLines,
   setHoveredBarcodeId,
+  isCollapsed,
 }) => {
   const [defaultType, setDefaultType] = useState("QR");
   const [barcodeTypes] = useState(["QR", "Code128"]);
@@ -65,11 +79,11 @@ const BarcodeTextAreaMode = ({
           "defaultType"
         );
       } else {
-        setDefaultType("QR"); // Optional: Reset to default or handle logged out state
+        setDefaultType("QR");
       }
     });
 
-    return () => unsubscribe(); // Cleanup subscription
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
@@ -92,10 +106,10 @@ const BarcodeTextAreaMode = ({
   const handleTextareaChange = (event) => {
     const lines = event.target.value.split("\n");
     const newBarcodeTextLines = lines.map((text, index) => ({
-      id: index + Date.now(), // Ensure unique ID for react key purposes
+      id: index + Date.now(),
       text: text,
-      prefix: prefix, // Apply the prefix to each line
-      type: defaultType, // Use the selected default type for all lines
+      prefix: prefix,
+      type: defaultType,
     }));
     setBarcodeTextLines(newBarcodeTextLines);
   };
@@ -119,49 +133,62 @@ const BarcodeTextAreaMode = ({
   };
 
   return (
-    <Grid item xs={6} sx={{ height: "50%", width: "100%", padding: "1rem" }}>
-      <Frame
-        sx={{
-          height: "100%",
-          overflowY: "auto",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ marginBottom: "1rem", marginTop: "1rem" }}>
-          <Select
-            value={defaultType}
-            onChange={handleDefaultTypeChange}
-            size="small"
-            displayEmpty
-            sx={{ marginRight: "1rem" }}
+    <Transition in={isCollapsed} timeout={duration}>
+      {(state) => (
+        <Grid
+          item
+          xs={6}
+          sx={{
+            ...defaultStyle,
+            ...transitionStyles[state],
+            width: "100%",
+            padding: "1rem",
+          }}
+        >
+          <Frame
+            sx={{
+              height: "100%",
+              overflowY: "auto",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            {barcodeTypes.map((type) => (
-              <MenuItem key={type} value={type}>
-                {type}
-              </MenuItem>
-            ))}
-          </Select>
-          <TextField
-            label="Prefix"
-            value={prefix}
-            onChange={handlePrefixChange}
-            size="small"
-            sx={{ width: "60%" }}
-          />
-        </div>
-        <CustomTextareaAutosize
-          minRows={50}
-          value={barcodeTextLines.map((barcode) => barcode.text).join("\n")}
-          onChange={handleTextareaChange}
-          onClick={handleCursorMove}
-          onKeyUp={handleCursorMove}
-          spellCheck={false}
-        />
-      </Frame>
-    </Grid>
+            <div style={{ marginBottom: "1rem", marginTop: "1rem" }}>
+              <Select
+                value={defaultType}
+                onChange={handleDefaultTypeChange}
+                size="small"
+                displayEmpty
+                sx={{ marginRight: "1rem" }}
+              >
+                {barcodeTypes.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {type}
+                  </MenuItem>
+                ))}
+              </Select>
+              <TextField
+                label="Prefix"
+                value={prefix}
+                onChange={handlePrefixChange}
+                size="small"
+                sx={{ width: "60%" }}
+              />
+            </div>
+            <CustomTextareaAutosize
+              minRows={50}
+              value={barcodeTextLines.map((barcode) => barcode.text).join("\n")}
+              onChange={handleTextareaChange}
+              onClick={handleCursorMove}
+              onKeyUp={handleCursorMove}
+              spellCheck={false}
+            />
+          </Frame>
+        </Grid>
+      )}
+    </Transition>
   );
 };
 

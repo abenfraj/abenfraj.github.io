@@ -72,12 +72,14 @@ const App = () => {
                 label={
                   <span>
                     {tab.label}
-                    <IconButton
-                      size="small"
-                      onClick={(event) => handleCloseTab(event, index)}
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
+                    {tabs.length > 1 && (
+                      <IconButton
+                        size="small"
+                        onClick={(event) => handleCloseTab(event, index)}
+                      >
+                        <CloseIcon fontSize="small" />
+                      </IconButton>
+                    )}
                   </span>
                 }
               />
